@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import "./index.css";
 import { mountSurvey } from "./surveyLogic";
+import { useMediaQuery } from "./hooks/useMediaQuery"; // 1. Hook 가져오기
 
 export default function App() {
+  const isMobile = useMediaQuery('(max-width: 767px)'); // 2. 화면 크기 감지
+  
   useEffect(() => {
-    mountSurvey(); // 화면이 그려진 뒤 DOM 이벤트/로직 연결
+    mountSurvey();
   }, []);
 
   return (
@@ -63,29 +66,45 @@ export default function App() {
       >
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="card rounded-3xl p-12 text-center">
-            <div className="icon-large">🎵</div>
-            <h2 className="text-6xl font-bold mb-6 text-gradient">쏙쏙</h2>
-            <p className="text-2xl text-gray-700 mb-4 font-medium">
-              브랜드의 목소리를 만드는 전문가
-            </p>
+            {/* ... */}
             <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl mx-auto">
               브랜드송부터 나레이션까지, 당신의 브랜드를 더욱 특별하게 만들어 줄
               <br />
               프리미엄 사운드 콘텐츠를 제작해드립니다.
             </p>
-            <div className="flex justify-center space-x-4">
-              <button
-                id="brandIntroPrevBtn"
-                className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
-              >
-                ← 이전
-              </button>
-              <button
-                id="brandIntroNextBtn"
-                className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
-              >
-                설문 시작하기 →
-              </button>
+            {/* 3. 버튼 조건부 렌더링 */}
+            <div className="flex justify-center space-x-4 button-group">
+              {isMobile ? (
+                <>
+                  <button
+                    id="brandIntroPrevBtn"
+                    className="bg-gray-100 text-gray-700 px-8 py-4 text-2xl font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+                  >
+                    ←
+                  </button>
+                  <button
+                    id="brandIntroNextBtn"
+                    className="btn-primary px-10 py-4 text-2xl font-semibold rounded-2xl"
+                  >
+                    →
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    id="brandIntroPrevBtn"
+                    className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+                  >
+                    ← 이전
+                  </button>
+                  <button
+                    id="brandIntroNextBtn"
+                    className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
+                  >
+                    설문 시작하기 →
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

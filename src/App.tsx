@@ -36,7 +36,7 @@ export default function App() {
       {/* 인트로 화면 */}
       <div
         id="intro-screen"
-        className="screen fixed inset-0 flex items-center justify-center z-40 pt-20"
+        className="screen fixed inset-0 flex justify-center z-40 pt-20"
       >
         <div className="text-center px-6">
           <div className="icon-large">👋</div>

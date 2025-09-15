@@ -5,10 +5,10 @@ import { useMediaQuery } from "./hooks/useMediaQuery"; // 1. Hook 가져오기
 
 export default function App() {
   const isMobile = useMediaQuery('(max-width: 767px)'); // 2. 화면 크기 감지
-  
+
   useEffect(() => {
-    mountSurvey();
-  }, []);
+    mountSurvey(isMobile); // 3. isMobile 상태를 surveyLogic으로 전달
+  }, [isMobile]);
 
   return (
     <main className="relative w-full h-screen bg-pattern">
@@ -54,7 +54,7 @@ export default function App() {
             className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl opacity-0"
             style={{ animation: "fadeIn 0.8s 3.5s ease-out forwards" }}
           >
-            시작하기 →
+            {isMobile ? "시작 →" : "시작하기 →"}
           </button>
         </div>
       </div>
@@ -66,45 +66,29 @@ export default function App() {
       >
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="card rounded-3xl p-12 text-center">
-            {/* ... */}
+            <div className="icon-large">🎵</div>
+            <h2 className="text-6xl font-bold mb-6 text-gradient">쏙쏙</h2>
+            <p className="text-2xl text-gray-700 mb-4 font-medium">
+              브랜드의 목소리를 만드는 전문가
+            </p>
             <p className="text-gray-600 text-lg leading-relaxed mb-12 max-w-2xl mx-auto">
               브랜드송부터 나레이션까지, 당신의 브랜드를 더욱 특별하게 만들어 줄
               <br />
               프리미엄 사운드 콘텐츠를 제작해드립니다.
             </p>
-            {/* 3. 버튼 조건부 렌더링 */}
             <div className="flex justify-center space-x-4 button-group">
-              {isMobile ? (
-                <>
-                  <button
-                    id="brandIntroPrevBtn"
-                    className="bg-gray-100 text-gray-700 px-8 py-4 text-2xl font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
-                  >
-                    ←
-                  </button>
-                  <button
-                    id="brandIntroNextBtn"
-                    className="btn-primary px-10 py-4 text-2xl font-semibold rounded-2xl"
-                  >
-                    →
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    id="brandIntroPrevBtn"
-                    className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
-                  >
-                    ← 이전
-                  </button>
-                  <button
-                    id="brandIntroNextBtn"
-                    className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
-                  >
-                    설문 시작하기 →
-                  </button>
-                </>
-              )}
+              <button
+                id="brandIntroPrevBtn"
+                className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+              >
+                {isMobile ? "←" : "← 이전"}
+              </button>
+              <button
+                id="brandIntroNextBtn"
+                className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
+              >
+                {isMobile ? "시작 →" : "설문 시작하기 →"}
+              </button>
             </div>
           </div>
         </div>
@@ -141,19 +125,19 @@ export default function App() {
                   className="input-field w-full px-6 py-4 text-lg rounded-2xl"
                 />
               </div>
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 button-group">
                 <button
                   id="storeNamePrevBtn"
                   className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
                 >
-                  ← 이전
+                  {isMobile ? "←" : "← 이전"}
                 </button>
                 <button
                   id="nextToServices"
                   className="btn-primary flex-1 py-4 text-lg font-semibold rounded-2xl"
                   disabled
                 >
-                  다음 단계로 →
+                  {isMobile ? "다음 →" : "다음 단계로 →"}
                 </button>
               </div>
             </div>
@@ -162,7 +146,7 @@ export default function App() {
       </div>
 
       {/* 서비스 선택 화면 */}
-      <div
+<div
         id="service-selection-screen"
         className="screen fixed inset-0 flex items-start justify-center z-10 hidden pt-20 overflow-y-auto"
       >
@@ -177,7 +161,7 @@ export default function App() {
                 id="serviceSelectionPrevBtn"
                 className="bg-gray-100 text-gray-700 px-6 py-3 text-base font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
               >
-                ← 이전 단계로
+                {isMobile ? "← 이전" : "← 이전 단계로"}
               </button>
             </div>
             <div className="grid md:grid-cols-2 gap-8" id="service-cards-container">
@@ -246,7 +230,7 @@ export default function App() {
                 id="industrySelectionPrevBtn"
                 className="bg-gray-100 text-gray-700 px-6 py-3 text-base font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
               >
-                ← 이전 단계로
+                {isMobile ? "← 이전" : "← 이전 단계로"}
               </button>
             </div>
             <div
@@ -300,23 +284,24 @@ export default function App() {
                   id="question-title"
                   className="text-3xl font-bold mb-4 text-gradient question-title"
                 />
+                {/* 질문 텍스트는 surveyLogic.ts에서 isMobile 값에 따라 제어됩니다. */}
                 <p id="question-text" className="text-gray-600 text-lg" />
                 <p id="question-example" className="text-gray-500 text-sm mt-2" />
               </div>
               <div id="answer-container" className="grid gap-3 options-grid" />
             </div>
-            <div className="flex space-x-4 mt-8">
+            <div className="flex space-x-4 mt-8 button-group">
               <button
                 id="surveyPrevBtn"
                 className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
               >
-                ← 이전
+                {isMobile ? "←" : "← 이전"}
               </button>
               <button
                 id="surveyNextBtn"
                 className="btn-primary flex-1 py-4 text-lg font-semibold rounded-2xl"
               >
-                다음 →
+                {isMobile ? "다음 →" : "다음 →"}
               </button>
             </div>
           </div>
@@ -349,7 +334,7 @@ export default function App() {
               id="restartBtn"
               className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
             >
-              처음으로 돌아가기
+              {isMobile ? "다시하기" : "처음으로 돌아가기"}
             </button>
           </div>
         </div>

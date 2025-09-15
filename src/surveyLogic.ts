@@ -1,3 +1,5 @@
+// surveyLogic.ts 파일 전체에 이 코드를 붙여넣으세요.
+
 import type { Question } from './questions';
 import {
   brandSongQuestions,
@@ -15,6 +17,7 @@ interface SurveyState {
   answers: Answers;
 }
 
+// [수정 1] AppState 인터페이스에 isMobile 속성 추가
 interface AppState {
   currentScreenId: string;
   history: any[];
@@ -24,8 +27,10 @@ interface AppState {
   survey: SurveyState;
   totalSteps: number;
   currentStep: number;
+  isMobile: boolean;
 }
 
+// [수정 2] state 객체에 isMobile 초기값 추가
 let state: AppState = {
   currentScreenId: 'intro-screen',
   history: [],
@@ -35,6 +40,7 @@ let state: AppState = {
   survey: { stage: 1, questions: [], currentStep: 0, answers: {} },
   totalSteps: 0,
   currentStep: 0,
+  isMobile: false,
 };
 
 let screens: Record<string, HTMLElement> = {} as any;
@@ -47,6 +53,7 @@ function el<T extends HTMLElement = HTMLElement>(id: string) {
   return document.getElementById(id) as T | null;
 }
 
+// ... (다른 유틸 함수들은 그대로입니다)
 function showToast(message: string) {
   const toast = el('toast');
   const toastMessage = el('toast-message');
@@ -137,6 +144,7 @@ function goBack() {
   }, 500);
 }
 
+
 function getIndustryQuestions(): Question[] {
   switch (state.selectedIndustry) {
     case '카페': return cafeQuestions;
@@ -168,7 +176,6 @@ function renderQuestion() {
 
   if (!titleEl || !textEl || !answerContainer) return;
 
-  // ✅ 컨테이너 클래스/내용 초기화 (레이아웃 잔상 방지)
   answerContainer.className = 'pb-4';
   answerContainer.innerHTML = '';
 
@@ -182,7 +189,9 @@ function renderQuestion() {
   }
 
   titleEl.textContent = q.title;
-  textEl.textContent = q.question;
+
+  // [최종 수정] mobileQuestion 속성을 사용하도록 변경
+  textEl.textContent = state.isMobile && q.mobileQuestion ? q.mobileQuestion : q.question;
 
   if (exampleEl) {
     if (q.example) {
@@ -196,6 +205,7 @@ function renderQuestion() {
   const saved = state.survey.answers[q.id];
 
   switch (q.type) {
+    // ... switch-case 이하는 수정사항 없습니다.
     case 'text': {
       const input = document.createElement('input');
       input.type = 'text';
@@ -393,7 +403,7 @@ function renderQuestion() {
   }
 }
 
-// ---------- 저장 & 진행 ----------
+// ... (saveAnswerAndProceed 이하 함수들은 수정할 필요 없습니다.)
 function saveAnswerAndProceed() {
   const q = state.survey.questions[state.survey.currentStep];
   if (!q) return;
@@ -578,7 +588,6 @@ function goBackInSurvey() {
   }
 }
 
-// ---------- 완료 화면 ----------
 function showCompletionScreen() {
   const msgEl = el('completion-message');
   const summaryWrapper = el('summary-container-wrapper');
@@ -631,7 +640,6 @@ function restartApp() {
   updateProgressBar();
 }
 
-// ---------- 초기화 & 마운트 ----------
 function initialize() {
   screens = {
     'intro-screen': el('intro-screen')!,
@@ -739,10 +747,22 @@ function initialize() {
   el('restartBtn')!.onclick = restartApp;
 }
 
-export function mountSurvey() {
+
+// [수정 4] mountSurvey 함수가 App.tsx로부터 isMobile 값을 받도록 수정
+export function mountSurvey(isMobile: boolean) {
   // 중복 마운트 방지
   const mounted = el('introNextBtn');
-  if (mounted && mounted.getAttribute('data-mounted') === '1') return;
+  if (mounted && mounted.getAttribute('data-mounted') === '1') {
+    if (state.isMobile !== isMobile) {
+      state.isMobile = isMobile;
+      if (state.currentScreenId === 'survey-screen') {
+        renderQuestion();
+      }
+    }
+    return;
+  }
+
+  state.isMobile = isMobile; // isMobile 값을 state에 저장
 
   initialize();
   mounted?.setAttribute('data-mounted', '1');

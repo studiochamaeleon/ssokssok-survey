@@ -277,11 +277,14 @@ export default function App() {
                   className="text-xl font-semibold text-gray-500 mb-6 hidden"
                   style={{ animation: "fadeIn 0.5s" }}
                 />
-                <h3 id="question-title" className="text-3xl font-bold mb-4 text-gradient" />
+                <h3
+                  id="question-title"
+                  className="text-3xl font-bold mb-4 text-gradient question-title"
+                />
                 <p id="question-text" className="text-gray-600 text-lg" />
                 <p id="question-example" className="text-gray-500 text-sm mt-2" />
               </div>
-              <div id="answer-container" className="space-y-3" />
+              <div id="answer-container" className="grid gap-3 options-grid" />
             </div>
             <div className="flex space-x-4 mt-8">
               <button

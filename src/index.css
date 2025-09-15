@@ -12,7 +12,7 @@
 }
 
 body {
-  background-color: #f0f2f5;
+  background-color: #FFFFFF;
   min-height: 100vh;
   overflow: hidden; /* 필요 없으면 지워도 됨 */
 }
@@ -20,7 +20,7 @@ body {
 #app-container {
   width: 100%;
   min-height: 100vh;
-  background-color: #FFFFFF;
+  background-color: #f0f2f5;
 }
 
 #root {

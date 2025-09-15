@@ -54,7 +54,7 @@ export default function App() {
             className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl opacity-0"
             style={{ animation: "fadeIn 0.8s 3.5s ease-out forwards" }}
           >
-            {isMobile ? "→" : "시작하기 →"}
+            {isMobile ? "시작 →" : "시작하기 →"}
           </button>
         </div>
       </div>
@@ -87,7 +87,7 @@ export default function App() {
                 id="brandIntroNextBtn"
                 className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
               >
-                {isMobile ? "시작 →" : "설문 시작하기 →"}
+                {isMobile ? "→" : "설문 시작하기 →"}
               </button>
             </div>
           </div>

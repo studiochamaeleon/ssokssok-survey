@@ -59,7 +59,7 @@ export default function App() {
       {/* 브랜드 소개 화면 */}
       <div
         id="brand-intro-screen"
-        className="screen fixed inset-0 flex items-center justify-center z-30 hidden pt-20"
+        className="screen fixed inset-0 flex justify-center z-30 hidden pt-20"
       >
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="card rounded-3xl p-12 text-center">
@@ -73,7 +73,7 @@ export default function App() {
               <br />
               프리미엄 사운드 콘텐츠를 제작해드립니다.
             </p>
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex justify-center space-x-4">
               <button
                 id="brandIntroPrevBtn"
                 className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
@@ -94,7 +94,7 @@ export default function App() {
       {/* 매장명 입력 화면 */}
       <div
         id="store-name-screen"
-        className="screen fixed inset-0 flex items-center justify-center z-20 hidden pt-20"
+        className="screen fixed inset-0 flex justify-center z-20 hidden pt-20"
       >
         <div className="container mx-auto px-6 max-w-2xl">
           <div className="card rounded-3xl p-10">
@@ -307,7 +307,7 @@ export default function App() {
       {/* 완료 화면 */}
       <div
         id="completion-screen"
-        className="screen fixed inset-0 flex items-center justify-center z-10 hidden pt-20"
+        className="screen fixed inset-0 flex justify-center z-10 hidden pt-20"
       >
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="card rounded-3xl p-12 text-center">

@@ -133,9 +133,43 @@ button {
     padding: 40px var(--container-padding);
   }
   
-  .service-card {
-    max-width: 200px; /* 👈 데스크톱에서 축소 (3개 배치) */
-    margin-bottom: 20px;
+  #service-selection .service-cards-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 20px !important;
+    max-width: 600px !important;
+    margin: 0 auto !important;
+  }
+
+  /* 브랜드송 카드 (첫 번째) */
+  .service-card[data-service="brand-song"] {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 20px 16px !important;
+    font-size: 14px !important;
+  }
+
+  /* 나레이션 카드 (두 번째) */
+  .service-card[data-service="narration"] {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 20px 16px !important;
+    font-size: 14px !important;
+  }
+
+  /* 브랜드송+나레이션 카드 (세 번째, 아래쪽 전체) */
+  .service-card[data-service="brand-song-narration"] {
+    grid-column: 1 / -1 !important; /* 전체 너비 차지 */
+    grid-row: 2 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 24px 20px !important;
+    font-size: 16px !important;
   }
   
   .completion-text {
@@ -204,9 +238,42 @@ button {
   font-size: 16px !important;
 }
 
-.desktop-mode .service-card {
-  max-width: 200px !important;
-  margin-bottom: 20px !important;
+/* 데스크톱 모드 - 서비스 선택 그리드 레이아웃 */
+.desktop-mode #service-selection .service-cards-container {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: auto auto !important;
+  gap: 20px !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+/* 데스크톱 모드 - 브랜드송 카드 (작은 카드) */
+.desktop-mode .service-card[data-service="brand-song"] {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 20px 16px !important;
+  font-size: 14px !important;
+}
+
+/* 데스크톱 모드 - 나레이션 카드 (작은 카드) */
+.desktop-mode .service-card[data-service="narration"] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 20px 16px !important;
+  font-size: 14px !important;
+}
+
+/* 데스크톱 모드 - 브랜드송+나레이션 카드 (큰 카드) */
+.desktop-mode .service-card[data-service="brand-song-narration"] {
+  grid-column: 1 / -1 !important; /* 전체 너비 */
+  grid-row: 2 !important;
+  width: 100% !important;
+  max-width: none !important;
   padding: 24px 20px !important;
   font-size: 16px !important;
 }
@@ -430,6 +497,261 @@ button {
     rgba(255, 255, 255, 0) 100%
   );
   animation: shimmer 2s infinite;
+}
+
+/* ==================== Progress Bar 간격 개선 ==================== */
+
+/* 기본 (모바일) - 더 넉넉한 간격 */
+.progress-bar {
+  margin-bottom: 24px !important; /* 👈 16px → 24px로 증가 */
+}
+
+.progress-bar-container {
+  padding-bottom: 20px !important; /* 👈 progress bar 아래 추가 여백 */
+}
+
+/* 설문 진행 화면 - 모바일 간격 */
+#survey-screen .container {
+  padding-top: 32px !important; /* 👈 progress bar와 콘텐츠 사이 간격 */
+}
+
+#survey-screen .question-container {
+  margin-top: 20px !important; /* 👈 질문 박스 상단 추가 여백 */
+}
+
+/* 완료 화면 - 모바일 간격 */
+#completion-screen .container,
+#submit-success-screen .container {
+  padding-top: 32px !important; /* 👈 progress bar와 체크마크 사이 간격 */
+}
+
+.completion-animation-container {
+  margin-top: 20px !important; /* 👈 체크마크 컨테이너 상단 여백 */
+}
+
+/* 강제 모바일 모드 - 확실한 간격 적용 */
+.mobile-mode #survey-screen .container {
+  padding-top: 32px !important;
+}
+
+.mobile-mode #survey-screen .question-container {
+  margin-top: 20px !important;
+}
+
+.mobile-mode #completion-screen .container,
+.mobile-mode #submit-success-screen .container {
+  padding-top: 32px !important;
+}
+
+.mobile-mode .completion-animation-container {
+  margin-top: 20px !important;
+}
+
+.mobile-mode .progress-bar {
+  margin-bottom: 24px !important;
+}
+
+.mobile-mode .progress-bar-container {
+  padding-bottom: 20px !important;
+}
+
+/* 데스크톱에서는 기존 간격 유지 */
+@media (min-width: 768px) {
+  .progress-bar {
+    margin-bottom: 16px !important; /* 데스크톱은 기존 간격 */
+  }
+  
+  .progress-bar-container {
+    padding-bottom: 16px !important;
+  }
+  
+  #survey-screen .container {
+    padding-top: 24px !important; /* 데스크톱은 더 적은 간격 */
+  }
+  
+  #survey-screen .question-container {
+    margin-top: 16px !important;
+  }
+  
+  #completion-screen .container,
+  #submit-success-screen .container {
+    padding-top: 24px !important;
+  }
+  
+  .completion-animation-container {
+    margin-top: 16px !important;
+  }
+}
+
+/* 강제 데스크톱 모드 */
+.desktop-mode .progress-bar {
+  margin-bottom: 16px !important;
+}
+
+.desktop-mode .progress-bar-container {
+  padding-bottom: 16px !important;
+}
+
+.desktop-mode #survey-screen .container {
+  padding-top: 24px !important;
+}
+
+.desktop-mode #survey-screen .question-container {
+  margin-top: 16px !important;
+}
+
+.desktop-mode #completion-screen .container,
+.desktop-mode #submit-success-screen .container {
+  padding-top: 24px !important;
+}
+
+.desktop-mode .completion-animation-container {
+  margin-top: 16px !important;
+}
+
+/* ==================== 추가: 전체적인 여백 개선 ==================== */
+
+/* 모바일에서 전체적으로 숨통 트이게 */
+.mobile-mode .screen {
+  padding: 20px 12px !important; /* 👈 16px → 20px로 증가 */
+}
+
+.mobile-mode .card,
+.mobile-mode .service-card,
+.mobile-mode .option-card {
+  margin-bottom: 16px !important; /* 👈 12px → 16px로 증가 */
+}
+
+/* 질문 제목과 옵션 사이 간격 */
+.mobile-mode .question-title {
+  margin-bottom: 24px !important; /* 👈 더 넉넉한 간격 */
+}
+
+/* 버튼 그룹 상단 여백 */
+.mobile-mode .button-group {
+  margin-top: 24px !important; /* 👈 옵션과 버튼 사이 간격 */
+}
+
+/* 완료 화면 요소들 간격 */
+.mobile-mode .completion-text {
+  margin-bottom: 20px !important; /* 👈 16px → 20px */
+}
+
+.mobile-mode .completion-subtitle {
+  margin-bottom: 24px !important; /* 👈 더 넉넉한 간격 */
+}
+
+.mobile-mode .completion-summary-wrapper {
+  margin-top: 28px !important; /* 👈 24px → 28px */
+  margin-bottom: 28px !important;
+}
+
+/* 303px 극소형 화면 추가 최적화 */
+@media (max-width: 320px) {
+  .progress-bar {
+    margin-bottom: 28px !important; /* 👈 가장 작은 화면에서 더 큰 간격 */
+  }
+  
+  .progress-bar-container {
+    padding-bottom: 24px !important;
+  }
+  
+  #survey-screen .container {
+    padding-top: 36px !important; /* 👈 더 큰 간격 */
+  }
+  
+  #completion-screen .container,
+  #submit-success-screen .container {
+    padding-top: 36px !important;
+  }
+  
+  .screen {
+    padding: 24px 12px !important; /* 👈 상하 패딩 더 증가 */
+  }
+}
+
+/* ==================== 구매 버튼 스타일 (새로 추가) ==================== */
+#purchase-plan-btn {
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
+  box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+#purchase-plan-btn:hover {
+  background: linear-gradient(135deg, #7c3aed, #2563eb) !important;
+  box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+#purchase-plan-btn:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+#purchase-plan-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+#purchase-plan-btn:hover::before {
+  left: 100%;
+}
+
+/* 제출 완료 화면 전용 애니메이션 타이밍 조정 */
+#submit-success-screen .completion-text {
+  color: #059669 !important; /* 제출 완료는 초록색 */
+  animation: fadeInText 0.8s 0.9s forwards ease-out;
+}
+
+#submit-success-screen .completion-subtitle {
+  animation: fadeInText 0.8s 1.2s forwards ease-out;
+}
+
+#submit-success-screen .completion-summary-wrapper {
+  animation: fadeInSummary 1s 1.8s forwards ease-out;
+}
+
+#submit-success-screen .checkmark-container {
+  background: linear-gradient(135deg, #059669, #047857) !important; /* 제출 완료는 진한 초록색 */
+  box-shadow: 0 10px 30px rgba(5, 150, 105, 0.3) !important;
+}
+
+/* 모바일 반응형 - 구매 버튼 */
+.mobile-mode #purchase-plan-btn {
+  font-size: 14px !important;
+  padding: 14px 20px !important;
+}
+
+.desktop-mode #purchase-plan-btn {
+  font-size: 16px !important;
+  padding: 16px 24px !important;
+}
+
+/* 다크모드 - 구매 버튼 */
+@media (prefers-color-scheme: dark) {
+  #purchase-plan-btn {
+    background: linear-gradient(135deg, #a855f7, #3b82f6) !important;
+  }
+  
+  #purchase-plan-btn:hover {
+    background: linear-gradient(135deg, #9333ea, #2563eb) !important;
+  }
+  
+  #submit-success-screen .completion-text {
+    color: #10b981 !important;
+  }
+  
+  #submit-success-screen .checkmark-container {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3) !important;
+  }
 }
 
 /* ==================== 화면 전환 애니메이션 ==================== */
@@ -1581,5 +1903,113 @@ button {
   
   .toast-message {
     color: #e5e7eb;
+  }
+}
+
+/* ==================== 서비스 카드 세부 스타일 복원 ==================== */
+
+/* 모바일: 세로 배치 (기존 유지) */
+.mobile-mode #service-selection .service-cards-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.mobile-mode .service-card {
+  width: 100% !important;
+  max-width: 280px !important;
+  margin-bottom: 16px !important; 
+  padding: 16px 12px !important;
+  font-size: 14px !important;
+  display: block !important;
+}
+
+/* 데스크톱 - 서비스 카드 내부 텍스트 크기 조정 */
+.desktop-mode .service-card[data-service="brand-song"] h4,
+.desktop-mode .service-card[data-service="narration"] h4 {
+  font-size: 1.25rem !important; /* 작은 카드는 작은 제목 */
+  margin-bottom: 12px !important;
+}
+
+.desktop-mode .service-card[data-service="brand-song-narration"] h4 {
+  font-size: 1.5rem !important; /* 큰 카드는 큰 제목 */
+  margin-bottom: 16px !important;
+}
+
+.desktop-mode .service-card[data-service="brand-song"] p,
+.desktop-mode .service-card[data-service="narration"] p {
+  font-size: 14px !important; /* 작은 카드는 작은 설명 */
+  line-height: 1.4 !important;
+}
+
+.desktop-mode .service-card[data-service="brand-song-narration"] p {
+  font-size: 16px !important; /* 큰 카드는 큰 설명 */
+  line-height: 1.5 !important;
+}
+
+/* 아이콘 크기도 조정 */
+.desktop-mode .service-card[data-service="brand-song"] .icon-medium,
+.desktop-mode .service-card[data-service="narration"] .icon-medium {
+  font-size: 2rem !important; /* 작은 아이콘 */
+}
+
+.desktop-mode .service-card[data-service="brand-song-narration"] .icon-medium {
+  font-size: 2.5rem !important; /* 큰 아이콘 */
+}
+
+/* 일반 서비스 카드 기본 스타일 유지 */
+.service-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+  border-radius: 24px;
+}
+
+.service-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 
+    0 25px 50px rgba(102, 126, 234, 0.3),
+    0 0 0 1px rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.4);
+}
+
+/* 서비스 선택 화면에서만 그리드 적용 */
+#service-selection .service-cards-container {
+  /* 모바일에서는 flex 세로 배치 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* 데스크톱에서만 그리드 레이아웃 */
+@media (min-width: 768px) {
+  #service-selection .service-cards-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .service-card[data-service="brand-song"] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .service-card[data-service="narration"] {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  
+  .service-card[data-service="brand-song-narration"] {
+    grid-column: 1 / -1; /* 전체 너비 */
+    grid-row: 2;
   }
 }

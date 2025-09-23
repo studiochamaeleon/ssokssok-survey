@@ -1,11 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
 
-/* ==================== 루트 변수 ==================== */
+/* ==================== 루트 변수 (모바일 기본) ==================== */
 :root {
-  --dynamic-font-size: clamp(14px, 4vw, 18px);
+  --dynamic-font-size: 14px; /* 👈 모바일 기본값으로 변경 */
+  --container-padding: 12px;
+  --card-padding: 16px 12px;
+  --button-padding: 12px 16px;
+  --font-size-base: 14px;
+  --font-size-title: 1.5rem;
+  --checkmark-size: 60px;
 }
 
-/* ==================== 기본 스타일 ==================== */
+/* 👈 데스크톱에서만 확대 */
+@media (min-width: 768px) {
+  :root {
+    --dynamic-font-size: 16px;
+    --container-padding: 20px;
+    --card-padding: 24px 20px;
+    --button-padding: 14px 24px;
+    --font-size-base: 16px;
+    --font-size-title: 2rem;
+    --checkmark-size: 80px;
+  }
+}
+
+/* ==================== 기본 스타일 (모바일 우선) ==================== */
 * {
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
@@ -14,6 +33,7 @@ body {
   background-color: #FFFFFF;
   min-height: 100vh;
   overflow: hidden;
+  font-size: var(--font-size-base); /* 👈 모바일 기본값 */
 }
 
 #app-container {
@@ -27,7 +47,57 @@ body {
   height: 100%;
 }
 
-/* ==================== 반응형 레이아웃 ==================== */
+/* ==================== 모바일 우선 레이아웃 ==================== */
+/* 👈 기본값: 모바일 (303px 기준) */
+.container {
+  max-width: 280px; /* 👈 모바일 기본값 */
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.screen {
+  padding: 16px var(--container-padding); /* 👈 모바일 기본값 */
+  font-size: var(--font-size-base);
+}
+
+/* 버튼 기본값 (모바일) */
+button {
+  padding: var(--button-padding);
+  font-size: var(--font-size-base);
+  min-height: 44px; /* 터치 최적화 */
+}
+
+/* 서비스 카드 기본값 (모바일) */
+.service-card {
+  width: 100%;
+  max-width: 280px; /* 👈 모바일 기본값 */
+  padding: var(--card-padding);
+  margin-bottom: 12px;
+  font-size: var(--font-size-base);
+}
+
+.option-card {
+  padding: var(--card-padding);
+  font-size: var(--font-size-base);
+}
+
+/* 완료 화면 기본값 (모바일) */
+.completion-text {
+  font-size: var(--font-size-title); /* 👈 모바일 기본값 */
+  margin-bottom: 16px;
+}
+
+.checkmark-container {
+  width: var(--checkmark-size);
+  height: var(--checkmark-size);
+}
+
+.question-title {
+  font-size: var(--font-size-title);
+  line-height: 1.3;
+}
+
+/* 👈 데스크톱에서만 확대 적용 */
 @media (min-width: 768px) {
   body {
     display: flex;
@@ -49,33 +119,119 @@ body {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     position: relative;
-    font-size: var(--dynamic-font-size);
   }
 
   #root {
     overflow-y: auto;
   }
+  
+  .container {
+    max-width: 720px; /* 👈 데스크톱에서만 확대 */
+  }
+  
+  .screen {
+    padding: 40px var(--container-padding);
+  }
+  
+  .service-card {
+    max-width: 200px; /* 👈 데스크톱에서 축소 (3개 배치) */
+    margin-bottom: 20px;
+  }
+  
+  .completion-text {
+    font-size: 3rem; /* 👈 데스크톱에서 확대 */
+    margin-bottom: 32px;
+  }
+  
+  .question-title {
+    font-size: 2rem;
+  }
 }
 
-@media (max-width: 767px) {
-  :root {
-    --dynamic-font-size: 15px;
-  }
+/* ==================== 강제 모바일/데스크톱 클래스 (새로 추가) ==================== */
+/* 👈 JavaScript로 강제 적용되는 클래스들 */
 
-  .option-card {
-    font-size: 0.9rem;
-    padding: 1rem;
-  }
+/* 강제 모바일 모드 */
+.mobile-mode .container {
+  max-width: 280px !important;
+  padding: 0 12px !important;
+}
 
-  .question-title {
-    font-size: 1.5rem;
-    line-height: 1.3;
-  }
+.mobile-mode .screen {
+  padding: 16px 12px !important;
+  font-size: 14px !important;
+}
 
-  .options-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
+.mobile-mode .service-card {
+  width: 100% !important;
+  max-width: 280px !important;
+  margin-bottom: 12px !important;
+  padding: 16px 12px !important;
+  font-size: 14px !important;
+}
+
+.mobile-mode .option-card {
+  padding: 16px 12px !important;
+  font-size: 14px !important;
+}
+
+.mobile-mode .completion-text {
+  font-size: 2rem !important;
+}
+
+.mobile-mode .checkmark-container {
+  width: 60px !important;
+  height: 60px !important;
+}
+
+.mobile-mode .question-title {
+  font-size: 1.5rem !important;
+}
+
+.mobile-mode button {
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+}
+
+/* 강제 데스크톱 모드 */
+.desktop-mode .container {
+  max-width: 720px !important;
+  padding: 0 20px !important;
+}
+
+.desktop-mode .screen {
+  padding: 40px 20px !important;
+  font-size: 16px !important;
+}
+
+.desktop-mode .service-card {
+  max-width: 200px !important;
+  margin-bottom: 20px !important;
+  padding: 24px 20px !important;
+  font-size: 16px !important;
+}
+
+.desktop-mode .option-card {
+  padding: 24px 20px !important;
+  font-size: 16px !important;
+}
+
+.desktop-mode .completion-text {
+  font-size: 3rem !important;
+}
+
+.desktop-mode .checkmark-container {
+  width: 80px !important;
+  height: 80px !important;
+}
+
+.desktop-mode .question-title {
+  font-size: 2rem !important;
+}
+
+.desktop-mode button {
+  padding: 14px 24px !important;
+  font-size: 16px !important;
 }
 
 /* ==================== 카드 스타일 ==================== */

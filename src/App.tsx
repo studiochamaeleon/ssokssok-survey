@@ -1,14 +1,39 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react"; // 👈 useState 추가!
 import "./index.css";
 import { mountSurvey } from "./surveyLogic";
-import { useMediaQuery } from "./hooks/useMediaQuery";
+// import { useMediaQuery } from "./hooks/useMediaQuery"; // 👈 더 이상 사용하지 않으므로 제거
 
 export default function App() {
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  // 👈 즉시 모바일 상태 감지로 변경
+  const [isMobile, setIsMobile] = useState(() => {
+    // 초기값을 즉시 계산
+    const width = window.innerWidth;
+    const isIframe = window !== window.parent;
+    
+    // Wix iframe 환경에서 모바일 감지
+    if (isIframe && width <= 350) {
+      console.log(`📱 즉시 모바일 감지: iframe ${width}px`);
+      return true;
+    }
+    
+    // 일반적인 모바일 감지
+    if (width <= 768) {
+      console.log(`📱 즉시 모바일 감지: 화면폭 ${width}px`);
+      return true;
+    }
+    
+    console.log(`🖥️ 즉시 데스크톱 감지: 화면폭 ${width}px`);
+    return false;
+  });
+
   const mountedRef = useRef(false);
   const currentMobileRef = useRef(isMobile);
 
   useEffect(() => {
+    // 👈 DOM 준비되면 즉시 모바일 상태 적용
+    document.body.classList.toggle('mobile-mode', isMobile);
+    document.body.classList.toggle('desktop-mode', !isMobile);
+    
     // 처음 마운트시에만 전체 초기화
     if (!mountedRef.current) {
       mountSurvey(isMobile);
@@ -23,18 +48,40 @@ export default function App() {
     }
   }, [isMobile]);
 
-  // 화면 크기 변경시 상태만 업데이트하는 함수
+  // 👈 즉시 클래스 적용 (중복이지만 확실하게)
+  useEffect(() => {
+    document.body.classList.toggle('mobile-mode', isMobile);
+    document.body.classList.toggle('desktop-mode', !isMobile);
+  }, [isMobile]);
+
+  // 👈 resize 이벤트 리스너 추가
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      const newIsMobile = width <= 768;
+      
+      if (newIsMobile !== isMobile) {
+        console.log(`📱 화면 크기 변경: ${width}px → ${newIsMobile ? 'MOBILE' : 'DESKTOP'}`);
+        setIsMobile(newIsMobile);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isMobile]);
+
+  // 👈 나머지 코드는 그대로 유지
   const updateMobileState = (mobile: boolean) => {
     const event = new CustomEvent('mobileStateChange', { detail: { isMobile: mobile } });
     window.dispatchEvent(event);
   };
 
-  // 버튼 텍스트 헬퍼 함수
   const getButtonText = (mobileText: string, desktopText: string) => 
     isMobile ? mobileText : desktopText;
 
   return (
-    <main className="relative w-full h-screen bg-pattern">
+    // 나머지 JSX 코드는 그대로...
+    <main className={`relative w-full h-screen bg-pattern ${isMobile ? 'mobile-mode' : 'desktop-mode'}`}>
       {/* Toast Notification */}
       <div
         id="toast"

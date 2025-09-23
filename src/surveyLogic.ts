@@ -1606,6 +1606,10 @@ function initialize(): void {
   // 모바일 상태 변경 리스너 추가
   window.addEventListener('mobileStateChange', handleMobileStateChange);
   
+  // 👈 새로 추가: 크기 변경 감지
+  window.addEventListener('resize', handleResize);
+  handleResize(); // 초기 실행
+  
   isInitialized = true;
   console.log('✅ 설문 시스템 초기화 완료');
 }
@@ -1980,6 +1984,19 @@ function setupCompletionEvents(): void {
 export function mountSurvey(isMobile: boolean): void {
   console.log('🎯 mountSurvey 호출됨 - isMobile:', isMobile);
   
+  // 👈 새로 추가: 즉시 모바일 상태 강제 설정
+  const actualIsMobile = detectMobileImmediate();
+  state.isMobile = actualIsMobile;
+  
+  // 모바일 감지 로그
+  console.log(`📱 모바일 감지 결과: ${actualIsMobile ? 'MOBILE' : 'DESKTOP'}`);
+  console.log(`📏 화면 크기: ${window.innerWidth}x${window.innerHeight}`);
+  
+  // 즉시 CSS 클래스 적용
+  document.body.classList.toggle('mobile-mode', actualIsMobile);
+  document.body.classList.toggle('desktop-mode', !actualIsMobile);
+  
+  // 👈 기존 코드는 그대로 유지
   // 이미 초기화되었다면 모바일 상태만 업데이트
   if (isInitialized) {
     console.log('📱 모바일 상태 업데이트만 진행');
@@ -2002,4 +2019,66 @@ export function mountSurvey(isMobile: boolean): void {
     console.log('🆕 새로운 설문 시작 - 초기화 진행');
     initialize();
   }
+}
+
+function detectMobileImmediate(): boolean {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const userAgent = navigator.userAgent;
+  
+  // 1. 화면 크기 기준 (가장 확실한 방법)
+  if (width <= 768) {
+    console.log(`✅ 모바일 감지: 화면폭 ${width}px <= 768px`);
+    return true;
+  }
+  
+  // 2. iframe 크기 기준 (Wix 삽입시)
+  if (width <= 350 && height >= 800) {
+    console.log(`✅ 모바일 감지: iframe 크기 ${width}x${height}`);
+    return true;
+  }
+  
+  // 3. User Agent 기준
+  const mobileKeywords = ['Mobile', 'Android', 'iPhone', 'iPad', 'iPod'];
+  if (mobileKeywords.some(keyword => userAgent.includes(keyword))) {
+    console.log(`✅ 모바일 감지: User Agent contains mobile keywords`);
+    return true;
+  }
+  
+  // 4. 터치 지원 + 작은 화면
+  if ('ontouchstart' in window && width <= 1024) {
+    console.log(`✅ 모바일 감지: 터치 지원 + 화면폭 ${width}px`);
+    return true;
+  }
+  
+  console.log(`🖥️ 데스크톱 감지: 화면폭 ${width}px > 768px`);
+  return false;
+}
+
+// 👈 기존 handleResize 함수 찾아서 교체 (없다면 추가)
+function handleResize(): void {
+  const wasMobile = state.isMobile;
+  const nowMobile = detectMobileImmediate();
+  
+  if (wasMobile !== nowMobile) {
+    console.log(`📱 모바일 상태 변경: ${wasMobile} → ${nowMobile}`);
+    
+    state.isMobile = nowMobile;
+    
+    // CSS 클래스 즉시 적용
+    document.body.classList.toggle('mobile-mode', nowMobile);
+    document.body.classList.toggle('desktop-mode', !nowMobile);
+    
+    // 커스텀 이벤트 발생
+    window.dispatchEvent(new CustomEvent('mobileStateChange', { 
+      detail: { isMobile: nowMobile } 
+    }));
+    
+    // 현재 화면 다시 렌더링
+    if (state.currentScreenId === 'survey-screen') {
+      renderQuestion();
+    }
+  }
+  
+  updateProgressBar();
 }

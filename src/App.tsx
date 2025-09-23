@@ -1,14 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "./index.css";
 import { mountSurvey } from "./surveyLogic";
-import { useMediaQuery } from "./hooks/useMediaQuery"; // 1. Hook 가져오기
+import { useMediaQuery } from "./hooks/useMediaQuery";
 
 export default function App() {
-  const isMobile = useMediaQuery('(max-width: 767px)'); // 2. 화면 크기 감지
+  const isMobile = useMediaQuery('(max-width: 767px)');
+  const mountedRef = useRef(false);
+  const currentMobileRef = useRef(isMobile);
 
   useEffect(() => {
-    mountSurvey(isMobile); // 3. isMobile 상태를 surveyLogic으로 전달
+    // 처음 마운트시에만 전체 초기화
+    if (!mountedRef.current) {
+      mountSurvey(isMobile);
+      mountedRef.current = true;
+      currentMobileRef.current = isMobile;
+    } 
+    // 모바일/데스크톱 전환시에만 화면 크기 업데이트
+    else if (currentMobileRef.current !== isMobile) {
+      // 백업 다이얼로그 재생성 방지 - 화면 크기만 업데이트
+      updateMobileState(isMobile);
+      currentMobileRef.current = isMobile;
+    }
   }, [isMobile]);
+
+  // 화면 크기 변경시 상태만 업데이트하는 함수
+  const updateMobileState = (mobile: boolean) => {
+    const event = new CustomEvent('mobileStateChange', { detail: { isMobile: mobile } });
+    window.dispatchEvent(event);
+  };
+
+  // 버튼 텍스트 헬퍼 함수
+  const getButtonText = (mobileText: string, desktopText: string) => 
+    isMobile ? mobileText : desktopText;
 
   return (
     <main className="relative w-full h-screen bg-pattern">
@@ -16,6 +39,8 @@ export default function App() {
       <div
         id="toast"
         className="fixed top-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg text-lg font-semibold opacity-0 transform -translate-y-10 transition-all duration-300 ease-out z-[100]"
+        role="alert"
+        aria-live="polite"
       >
         <p id="toast-message"></p>
       </div>
@@ -24,6 +49,8 @@ export default function App() {
       <div
         id="progressBarContainer"
         className="fixed top-0 left-0 right-0 z-50 progress-bar-container hidden"
+        role="progressbar"
+        aria-label="설문 진행률"
       >
         <div className="max-w-4xl mx-auto px-6 py-3">
           <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
@@ -37,13 +64,14 @@ export default function App() {
       </div>
 
       {/* 인트로 화면 */}
-      <div
+      <section
         id="intro-screen"
         className="screen fixed inset-0 flex justify-center z-40 pt-20"
+        aria-labelledby="intro-title"
       >
         <div className="text-center px-6">
-          <div className="icon-large">👋</div>
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-8 typing">
+          <div className="icon-large" role="img" aria-label="안녕하세요">👋</div>
+          <h1 id="intro-title" className="text-5xl md:text-7xl font-bold text-gray-800 mb-8 typing">
             안녕하세요!
           </h1>
           <p className="text-xl text-gray-700 mb-12 max-w-md mx-auto">
@@ -51,23 +79,25 @@ export default function App() {
           </p>
           <button
             id="introNextBtn"
-            className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl opacity-0"
-            style={{ animation: "fadeIn 0.8s 3.5s ease-out forwards" }}
+            className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl animate-fade-in"
+            style={{ animationDelay: '1s', animationFillMode: 'both' }}
+            aria-label="설문 시작하기"
           >
-            {isMobile ? "시작 →" : "시작하기 →"}
+            {getButtonText("시작 →", "시작하기 →")}
           </button>
         </div>
-      </div>
+      </section>
 
       {/* 브랜드 소개 화면 */}
-      <div
+      <section
         id="brand-intro-screen"
         className="screen fixed inset-0 flex justify-center z-30 hidden pt-20"
+        aria-labelledby="brand-intro-title"
       >
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="card rounded-3xl p-12 text-center">
-            <div className="icon-large">🎵</div>
-            <h2 className="text-6xl font-bold mb-6 text-gradient">쏙쏙</h2>
+            <div className="icon-large" role="img" aria-label="음악">🎵</div>
+            <h2 id="brand-intro-title" className="text-6xl font-bold mb-6 text-gradient">쏙쏙</h2>
             <p className="text-2xl text-gray-700 mb-4 font-medium">
               브랜드의 목소리를 만드는 전문가
             </p>
@@ -80,30 +110,33 @@ export default function App() {
               <button
                 id="brandIntroPrevBtn"
                 className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+                aria-label="이전 단계로"
               >
-                {isMobile ? "←" : "← 이전"}
+                {getButtonText("←", "← 이전")}
               </button>
               <button
                 id="brandIntroNextBtn"
                 className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
+                aria-label="설문 시작하기"
               >
-                {isMobile ? "→" : "설문 시작하기 →"}
+                {getButtonText("→", "설문 시작하기 →")}
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* 매장명 입력 화면 */}
-      <div
+      <section
         id="store-name-screen"
         className="screen fixed inset-0 flex justify-center z-20 hidden pt-20"
+        aria-labelledby="store-name-title"
       >
         <div className="container mx-auto px-6 max-w-2xl">
           <div className="card rounded-3xl p-10">
             <div className="text-center mb-10">
-              <div className="icon-medium">🏪</div>
-              <h3 className="text-3xl font-bold mb-4 text-gradient">
+              <div className="icon-medium" role="img" aria-label="매장">🏪</div>
+              <h3 id="store-name-title" className="text-3xl font-bold mb-4 text-gradient">
                 브랜드 정보를 입력해주세요
               </h3>
               <p className="text-gray-600 text-lg">
@@ -116,160 +149,180 @@ export default function App() {
                   htmlFor="storeName"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  브랜드/매장명
+                  브랜드/매장명 <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   id="storeName"
                   placeholder="예: 카페 모카"
                   className="input-field w-full px-6 py-4 text-lg rounded-2xl"
+                  required
+                  aria-describedby="storeName-help"
                 />
+                <p id="storeName-help" className="sr-only">
+                  브랜드 또는 매장명을 입력해주세요
+                </p>
               </div>
-              <div className="flex space-x-4 button-group">
-                <button
-                  id="storeNamePrevBtn"
-                  className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
-                >
-                  {isMobile ? "←" : "← 이전"}
-                </button>
-                <button
-                  id="nextToServices"
-                  className="btn-primary flex-1 py-4 text-lg font-semibold rounded-2xl"
-                  disabled
-                >
-                  {isMobile ? "다음 →" : "다음 단계로 →"}
-                </button>
-              </div>
+              <NavigationButtons
+                prevId="storeNamePrevBtn"
+                nextId="nextToServices"
+                nextDisabled={true}
+                isMobile={isMobile}
+              />
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* 업종 입력 화면 */}
+      <section
+        id="industry-input-screen"
+        className="screen fixed inset-0 flex justify-center z-20 hidden pt-20"
+        aria-labelledby="industry-title"
+      >
+        <div className="container mx-auto px-6 max-w-2xl">
+          <div className="card rounded-3xl p-10">
+            <div className="text-center mb-10">
+              <div className="icon-medium" role="img" aria-label="업종">🏢</div>
+              <h3 id="industry-title" className="text-3xl font-bold mb-4 text-gradient">
+                업종을 입력해주세요
+              </h3>
+              <p className="text-gray-600 text-lg">
+                맞춤형 설문을 위해 업종 정보가 필요해요
+              </p>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <label
+                  htmlFor="industryInput"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  업종 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="industryInput"
+                  placeholder="예: 카페, 음식점, 병원, 레저시설 등"
+                  className="input-field w-full px-6 py-4 text-lg rounded-2xl"
+                  required
+                  aria-describedby="industry-help"
+                />
+                <p id="industry-help" className="sr-only">
+                  업종을 입력해주세요
+                </p>
+              </div>
+              <NavigationButtons
+                prevId="industryInputPrevBtn"
+                nextId="industryInputNextBtn"
+                nextDisabled={true}
+                isMobile={isMobile}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 연락처 입력 화면 */}
+      <section
+        id="contact-info-screen"
+        className="screen fixed inset-0 flex justify-center z-20 hidden pt-20"
+        aria-labelledby="contact-title"
+      >
+        <div className="container mx-auto px-6 max-w-2xl">
+          <div className="card rounded-3xl p-10">
+            <div className="text-center mb-10">
+              <div className="icon-medium" role="img" aria-label="이메일">📧</div>
+              <h3 id="contact-title" className="text-3xl font-bold mb-4 text-gradient">
+                연락처 정보를 입력해주세요
+              </h3>
+              <p className="text-gray-600 text-lg">
+                설문이 마치면 확인 후 연락드릴 예정입니다.
+              </p>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <label
+                  htmlFor="contactEmail"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  이메일 주소 <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="contactEmail"
+                  placeholder="예: sssg@ssokssok.com"
+                  className="input-field w-full px-6 py-4 text-lg rounded-2xl"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  required
+                  aria-describedby="email-help"
+                />
+                <p id="email-help" className="sr-only">
+                  연락받을 이메일 주소를 입력해주세요
+                </p>
+              </div>
+              <NavigationButtons
+                prevId="contactInfoPrevBtn"
+                nextId="contactInfoNextBtn"
+                nextDisabled={true}
+                isMobile={isMobile}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 서비스 선택 화면 */}
-<div
+      <section
         id="service-selection-screen"
         className="screen fixed inset-0 flex items-start justify-center z-10 hidden pt-20 overflow-y-auto"
+        aria-labelledby="service-selection-title"
       >
         <div className="container mx-auto px-6 max-w-6xl py-12">
           <div className="card rounded-3xl p-10">
             <div className="text-center mb-12">
-              <h3 className="text-4xl font-bold mb-4 text-gradient">
+              <h3 id="service-selection-title" className="text-4xl font-bold mb-4 text-gradient">
                 어떤 음원을 제작하고 싶으세요?
               </h3>
-              <p className="text-gray-600 text-xl mb-6" id="brandNameDisplay"></p>
+              <p className="text-gray-600 text-xl mb-6" id="brandNameDisplay" aria-live="polite"></p>
               <button
                 id="serviceSelectionPrevBtn"
                 className="bg-gray-100 text-gray-700 px-6 py-3 text-base font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
+                aria-label="이전 단계로"
               >
-                {isMobile ? "← 이전" : "← 이전 단계로"}
+                {getButtonText("← 이전", "← 이전 단계로")}
               </button>
             </div>
-            <div className="grid md:grid-cols-2 gap-8" id="service-cards-container">
-              <div className="service-card rounded-3xl p-8" data-service="브랜드송">
-                <div className="text-center">
-                  <div className="icon-medium">🎵</div>
-                  <h4 className="text-2xl font-bold text-gray-800 mb-4">브랜드송</h4>
-                  <p className="text-gray-600 text-lg mb-4">
-                    브랜드를 기억하게 하는 멜로디
-                  </p>
-                </div>
-              </div>
-              <div className="service-card rounded-3xl p-8" data-service="나레이션">
-                <div className="text-center">
-                  <div className="icon-medium">🎙️</div>
-                  <h4 className="text-2xl font-bold text-gray-800 mb-4">나레이션</h4>
-                  <p className="text-gray-600 text-lg mb-4">
-                    브랜드 스토리를 전하는 목소리
-                  </p>
-                </div>
-              </div>
-              <div
-                className="service-card rounded-3xl p-8"
-                data-service="브랜드송+나레이션"
-              >
-                <div className="text-center">
-                  <div className="icon-medium">🎼</div>
-                  <h4 className="text-2xl font-bold text-gray-800 mb-4">
-                    브랜드송 + 나레이션
-                  </h4>
-                  <p className="text-gray-600 text-lg mb-4">
-                    완벽한 브랜드 사운드 패키지
-                  </p>
-                </div>
-              </div>
-              <div className="service-card rounded-3xl p-8" data-service="플레이리스트">
-                <div className="text-center">
-                  <div className="icon-medium">📱</div>
-                  <h4 className="text-2xl font-bold text-gray-800 mb-4">플레이리스트</h4>
-                  <p className="text-gray-600 text-lg mb-4">
-                    브랜드 분위기에 맞는 음악 모음
-                  </p>
-                </div>
-              </div>
+            <div className="grid md:grid-cols-2 gap-8" id="service-cards-container" role="group" aria-labelledby="service-selection-title">
+              <ServiceCard
+                service="브랜드송"
+                icon="🎵"
+                title="브랜드송"
+                description="브랜드를 기억하게 하는 멜로디"
+              />
+              <ServiceCard
+                service="나레이션"
+                icon="🎙️"
+                title="나레이션"
+                description="브랜드 스토리를 전하는 목소리"
+              />
+              <ServiceCard
+                service="브랜드송+나레이션"
+                icon="🎼"
+                title="브랜드송 + 나레이션"
+                description="완벽한 브랜드 사운드 패키지"
+                className="md:col-span-2"
+              />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 업종 선택 화면 */}
-      <div
-        id="industry-selection-screen"
-        className="screen fixed inset-0 flex items-start justify-center z-10 hidden pt-20 overflow-y-auto"
-      >
-        <div className="container mx-auto px-6 max-w-6xl py-12">
-          <div className="card rounded-3xl p-10">
-            <div className="text-center mb-12">
-              <h3 className="text-4xl font-bold mb-4 text-gradient">
-                어떤 업종에 해당하시나요?
-              </h3>
-              <p
-                className="text-gray-600 text-xl mb-6"
-                id="industryBrandNameDisplay"
-              ></p>
-              <button
-                id="industrySelectionPrevBtn"
-                className="bg-gray-100 text-gray-700 px-6 py-3 text-base font-medium rounded-xl hover:bg-gray-200 transition-all duration-300"
-              >
-                {isMobile ? "← 이전" : "← 이전 단계로"}
-              </button>
-            </div>
-            <div
-              className="grid md:grid-cols-2 lg:grid-cols-4 gap-8"
-              id="industry-cards-container"
-            >
-              <div className="service-card rounded-3xl p-8" data-industry="카페">
-                <div className="text-center">
-                  <div className="icon-medium">☕</div>
-                  <h4 className="text-2xl font-bold text-gray-800">카페</h4>
-                </div>
-              </div>
-              <div className="service-card rounded-3xl p-8" data-industry="병원/클리닉">
-                <div className="text-center">
-                  <div className="icon-medium">🏥</div>
-                  <h4 className="text-2xl font-bold text-gray-800">병원/클리닉</h4>
-                </div>
-              </div>
-              <div className="service-card rounded-3xl p-8" data-industry="음식점">
-                <div className="text-center">
-                  <div className="icon-medium">🍽️</div>
-                  <h4 className="text-2xl font-bold text-gray-800">음식점</h4>
-                </div>
-              </div>
-              <div className="service-card rounded-3xl p-8" data-industry="레저">
-                <div className="text-center">
-                  <div className="icon-medium">🎯</div>
-                  <h4 className="text-2xl font-bold text-gray-800">레저</h4>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
 
       {/* 설문 화면 */}
-      <div
+      <section
         id="survey-screen"
         className="screen fixed inset-0 flex items-start justify-center z-10 hidden pt-20 overflow-y-auto"
+        aria-labelledby="survey-title"
       >
         <div className="container mx-auto px-6 max-w-4xl py-12">
           <div className="card rounded-3xl p-10">
@@ -277,68 +330,190 @@ export default function App() {
               <div className="text-center mb-8">
                 <h2
                   id="question-section"
-                  className="text-xl font-semibold text-gray-500 mb-6 hidden"
-                  style={{ animation: "fadeIn 0.5s" }}
+                  className="text-xl font-semibold text-gray-500 mb-6 hidden animate-fade-in"
                 />
                 <h3
                   id="question-title"
                   className="text-3xl font-bold mb-4 text-gradient question-title"
                 />
-                {/* 질문 텍스트는 surveyLogic.ts에서 isMobile 값에 따라 제어됩니다. */}
                 <p id="question-text" className="text-gray-600 text-lg" />
                 <p id="question-example" className="text-gray-500 text-sm mt-2" />
               </div>
-              <div id="answer-container" className="grid gap-3 options-grid" />
+              <div 
+                id="answer-container" 
+                className="grid gap-3 options-grid"
+                role="group"
+                aria-labelledby="question-title"
+              />
             </div>
-            <div className="flex space-x-4 mt-8 button-group">
-              <button
-                id="surveyPrevBtn"
-                className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+            <NavigationButtons
+              prevId="surveyPrevBtn"
+              nextId="surveyNextBtn"
+              isMobile={isMobile}
+            />
+          </div>
+        </div>
+      </section>
+
+
+      {/* 완료 화면 - 체크마크 애니메이션 + 스크롤 가능 */}
+      <section
+        id="completion-screen"
+        className="screen fixed inset-0 flex items-start justify-center z-10 hidden pt-20 overflow-y-auto"
+        aria-labelledby="completion-title"
+      >
+        <div className="container mx-auto px-6 max-w-4xl py-12 min-h-screen flex flex-col justify-start">
+          {/* 체크마크 애니메이션 섹션 */}
+          <div className="completion-animation-container text-center mb-12 flex-shrink-0">
+            <div className="checkmark-container mx-auto mb-6">
+              <div className="checkmark"></div>
+            </div>
+            <h1 id="completion-title" className="completion-text text-4xl font-bold mb-8">
+              설문 완료!
+            </h1>
+            <p id="completion-message" className="completion-subtitle text-xl text-gray-600 mb-12">
+              소중한 답변 감사드립니다. 답변 내용을 검토하시고 필요시 수정하실 수 있습니다.
+            </p>
+          </div>
+
+          {/* 답변 요약 섹션 - 애니메이션 후 표시 + 스크롤 가능 */}
+          <div className="completion-summary-wrapper opacity-0 flex-1">
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6">📋 답변 요약</h2>
+              <div id="completion-summary" className="space-y-6" role="region" aria-label="답변 요약">
+                {/* 답변 요약이 여기에 동적으로 삽입됩니다 */}
+              </div>
+            </div>
+
+            {/* 액션 버튼 - 하단 고정 */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center sticky bottom-0 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg mb-6">
+              <button 
+                id="restartBtn" 
+                className="px-8 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                aria-label="처음부터 다시 시작"
               >
-                {isMobile ? "←" : "← 이전"}
+                🔄 처음부터 다시 시작
               </button>
-              <button
-                id="surveyNextBtn"
-                className="btn-primary flex-1 py-4 text-lg font-semibold rounded-2xl"
+              <button 
+                id="submitBtn" 
+                className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                aria-label="설문 제출하기"
               >
-                {isMobile ? "다음 →" : "다음 →"}
+                📤 제출하기
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 완료 화면 */}
-      <div
-        id="completion-screen"
-        className="screen fixed inset-0 flex justify-center z-10 hidden pt-20"
+      {/* 제출 완료 화면 - 새로운 체크마크 애니메이션 */}
+      <section
+        id="submit-success-screen"
+        className="screen fixed inset-0 flex justify-center items-center z-10 hidden"
+        aria-labelledby="success-title"
       >
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="card rounded-3xl p-12 text-center">
-            <div className="icon-large">🎉</div>
-            <h2 className="text-4xl font-bold mb-6 text-gradient">
-              설문이 완료되었습니다!
-            </h2>
-            <p
-              className="text-gray-600 text-lg leading-relaxed mb-10 max-w-2xl mx-auto"
-              id="completion-message"
-            />
-            <div id="summary-container-wrapper" className="hidden">
-              <h3 className="font-bold text-xl mb-4 text-gray-700">제출된 답변 요약</h3>
-              <div
-                id="summary-container"
-                className="text-left bg-gray-50 p-6 rounded-2xl max-h-60 overflow-y-auto mb-10 border"
-              />
+        <div className="container mx-auto px-6 max-w-2xl">
+          {/* 체크마크 애니메이션 섹션 */}
+          <div className="completion-animation-container text-center mb-12">
+            <div className="checkmark-container mx-auto mb-6">
+              <div className="checkmark"></div>  
             </div>
-            <button
-              id="restartBtn"
-              className="btn-primary px-10 py-4 text-lg font-semibold rounded-2xl"
+            <h1 id="success-title" className="completion-text text-4xl font-bold mb-8">
+              제출 완료!
+            </h1>
+            
+            <div id="submit-success-message" className="completion-subtitle space-y-4 mb-8">
+              <p className="text-xl text-gray-700 font-medium">
+                <span id="brand-name-display" aria-live="polite"></span>님의 소중한 답변을 받았습니다.
+              </p>
+              <p className="text-lg text-gray-600">
+                전문 상담사가 24시간 내로 연락드릴 예정입니다.
+              </p>
+              <p className="text-base text-gray-500">
+                더 자세한 상담을 원하시면 언제든 문의해 주세요! 🎵
+              </p>
+            </div>
+          </div>
+
+          {/* 액션 버튼들 - 애니메이션 후 표시 */}
+          <div className="completion-summary-wrapper opacity-0 flex flex-col gap-4 justify-center">
+            {/* 구매 버튼 */}
+            <button 
+              id="purchase-plan-btn" 
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 font-semibold text-lg shadow-lg transform hover:scale-105"
+              aria-label="선택한 플랜 구매하기"
             >
-              {isMobile ? "다시하기" : "처음으로 돌아가기"}
+              🎵 <span id="selected-service-name"></span> 플랜 구매
+            </button>
+            
+            {/* 새로운 설문 시작 버튼 */}
+            <button 
+              id="restart-from-success-btn" 
+              className="px-8 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+              aria-label="새로운 설문 시작하기"
+            >
+              🔄 새로운 설문 시작하기
             </button>
           </div>
         </div>
-      </div>
+      </section>
     </main>
+  );
+}
+
+// 네비게이션 버튼 컴포넌트
+interface NavigationButtonsProps {
+  prevId: string;
+  nextId: string;
+  nextDisabled?: boolean;
+  isMobile: boolean;
+}
+
+function NavigationButtons({ prevId, nextId, nextDisabled = false, isMobile }: NavigationButtonsProps) {
+  return (
+    <div className="flex space-x-4 button-group">
+      <button
+        id={prevId}
+        className="bg-gray-100 text-gray-700 px-8 py-4 text-lg font-semibold rounded-2xl hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+        aria-label="이전 단계로"
+      >
+        {isMobile ? "←" : "← 이전"}
+      </button>
+      <button
+        id={nextId}
+        className="btn-primary flex-1 py-4 text-lg font-semibold rounded-2xl"
+        disabled={nextDisabled}
+        aria-label="다음 단계로"
+      >
+        {isMobile ? "다음 →" : "다음 단계로 →"}
+      </button>
+    </div>
+  );
+}
+
+// 서비스 카드 컴포넌트
+interface ServiceCardProps {
+  service: string;
+  icon: string;
+  title: string;
+  description: string;
+  className?: string;
+}
+
+function ServiceCard({ service, icon, title, description, className = "" }: ServiceCardProps) {
+  return (
+    <div 
+      className={`service-card rounded-3xl p-8 ${className}`} 
+      data-service={service}
+      role="button"
+      tabIndex={0}
+      aria-label={`${title} 선택`}
+    >
+      <div className="text-center">
+        <div className="icon-medium" role="img" aria-label={title}>{icon}</div>
+        <h4 className="text-2xl font-bold text-gray-800 mb-4">{title}</h4>
+        <p className="text-gray-600 text-lg mb-4">{description}</p>
+      </div>
+    </div>
   );
 }

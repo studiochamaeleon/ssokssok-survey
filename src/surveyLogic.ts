@@ -357,6 +357,12 @@ function transitionToScreen(nextScreenId: string): void {
   }
   
   state.currentScreenId = nextScreenId;
+
+    // 👈 새로 추가: 화면 전환 후 높이 업데이트
+  setTimeout(() => {
+    optimizeForMobile();
+    updateIframeHeight();
+  }, 100);
 }
 
 function saveAndGoTo(nextScreenId: string): void {
@@ -1609,9 +1615,32 @@ function initialize(): void {
   // 👈 새로 추가: 크기 변경 감지
   window.addEventListener('resize', handleResize);
   handleResize(); // 초기 실행
+
+  // 👈 새로 추가: 입력 필드 자동 스크롤 설정
+  setupInputAutoScroll();
+  
+  // 👈 새로 추가: 키보드 이벤트 설정
+  setupKeyboardEvents();  
   
   isInitialized = true;
   console.log('✅ 설문 시스템 초기화 완료');
+}
+
+function setupKeyboardEvents(): void {
+  // 키보드 상태 변경 감지
+  window.addEventListener('resize', () => {
+    setTimeout(updateIframeHeight, 100);
+  });
+
+  document.addEventListener('focusin', (e) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      setTimeout(updateIframeHeight, 300);
+    }
+  });
+
+  document.addEventListener('focusout', () => {
+    setTimeout(updateIframeHeight, 300);
+  });
 }
 
 function setupBasicNavigation(): void {
@@ -1996,7 +2025,12 @@ export function mountSurvey(isMobile: boolean): void {
   document.body.classList.toggle('mobile-mode', actualIsMobile);
   document.body.classList.toggle('desktop-mode', !actualIsMobile);
   
-  // 👈 기존 코드는 그대로 유지
+  // 👈 새로 추가: 320x520 특별 처리
+  if (window.innerWidth <= 340 && window.innerHeight <= 540) {
+    document.body.classList.add('iframe-320x520');
+    console.log('📱 320x520 iframe 모드 활성화');
+  }
+
   // 이미 초기화되었다면 모바일 상태만 업데이트
   if (isInitialized) {
     console.log('📱 모바일 상태 업데이트만 진행');
@@ -2082,3 +2116,82 @@ function handleResize(): void {
   
   updateProgressBar();
 }
+
+// ==================== 320×520 iframe 최적화 ====================
+// iframe 높이 자동 조정 함수
+function updateIframeHeight(): void {
+  const isKeyboardVisible = document.body.classList.contains('keyboard-visible');
+  const currentScreen = document.querySelector('.screen:not(.hidden)');
+  
+  if (!currentScreen) return;
+  
+  let targetHeight: number;
+  
+  if (window.innerWidth <= 340 && window.innerHeight <= 540) {
+    // 320x520 iframe 환경
+    if (isKeyboardVisible) {
+      targetHeight = 280; // 키보드 있을 때
+    } else {
+      targetHeight = 520; // 기본 높이
+    }
+  } else {
+    // 일반 iframe 환경
+    const contentHeight = currentScreen.scrollHeight;
+    targetHeight = Math.min(contentHeight + 40, 800);
+  }
+  
+  // 부모 창에 높이 전달
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({
+      type: 'resize',
+      height: targetHeight,
+      isKeyboard: isKeyboardVisible
+    }, '*');
+  }
+  
+  console.log(`📏 iframe 높이 조정: ${targetHeight}px (키보드: ${isKeyboardVisible})`);
+}
+
+// 모바일 최적화 함수
+function optimizeForMobile(): void {
+  if (window.innerWidth <= 767) {
+    // 모바일 전용 클래스 추가
+    document.body.classList.add('mobile-compact');
+    
+    // iframe 높이 자동 조정
+    updateIframeHeight();
+  }
+}
+
+// 입력 필드 포커스시 자동 스크롤
+function setupInputAutoScroll(): void {
+  const inputs = document.querySelectorAll('input, textarea');
+  
+  inputs.forEach(input => {
+    input.addEventListener('focus', (e) => {
+      setTimeout(() => {
+        const target = e.target as HTMLElement;
+        
+        // 요소가 화면 상단 1/3 지점에 오도록 스크롤
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'nearest'
+        });
+        
+        // 추가로 조금 더 위로 스크롤
+        setTimeout(() => {
+          window.scrollBy(0, -50);
+        }, 300);
+      }, 300); // 키보드 애니메이션 후
+    });
+  });
+}
+
+// ==================== 화면 전환 별칭 함수 ====================
+function showScreen(screenId: string): void {
+  transitionToScreen(screenId);
+}
+
+// export도 추가 (외부에서 사용할 경우)
+export { showScreen };

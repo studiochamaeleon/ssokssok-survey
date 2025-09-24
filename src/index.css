@@ -2013,3 +2013,233 @@ button {
     grid-row: 2;
   }
 }
+
+/* ==================== 320×520px + 키보드 통합 최적화 ==================== */
+@media (max-width: 320px), (max-height: 520px) {
+  /* 기본 변수 설정 */
+  :root {
+    --font-size-base: 10px !important;
+    --font-size-title: 0.9rem !important;
+    --container-padding: 4px !important;
+    --card-padding: 6px 4px !important;
+    --button-padding: 6px 8px !important;
+    --checkmark-size: 25px !important;
+  }
+  
+  /* 컨테이너 최적화 */
+  .container {
+    max-width: 310px !important;
+    padding: 0 5px !important;
+  }
+  
+  .screen {
+    padding: 4px 5px !important;
+  }
+  
+  /* 모든 화면 요소 크기 축소 */
+  .icon-large { font-size: 2em !important; }
+  .icon-medium { font-size: 1.5em !important; }
+  .text-3xl { font-size: 1.2rem !important; }
+  .text-lg { font-size: 0.8rem !important; }
+  
+  /* 입력 필드 최소화 */
+  .input-field {
+    padding: 8px 10px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+  }
+  
+  /* 버튼 최소화 */
+  button {
+    padding: 6px 8px !important;
+    font-size: 0.7rem !important;
+    min-height: 24px !important;
+    border-radius: 6px !important;
+  }
+  
+  /* 완료 화면 최소화 */
+  .checkmark-container {
+    width: 25px !important;
+    height: 25px !important;
+  }
+  
+  .completion-text {
+    font-size: 1.2rem !important;
+  }
+}
+
+/* ==================== 키보드 활성화 상태 (통합) ==================== */
+.keyboard-active .screen {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+.keyboard-active .card {
+  padding: 4px 6px !important;
+}
+
+.keyboard-active .icon-medium,
+.keyboard-active .icon-large {
+  display: none !important;
+}
+
+.keyboard-active h1,
+.keyboard-active h2,
+.keyboard-active h3 {
+  font-size: 0.8rem !important;
+  margin-bottom: 4px !important;
+}
+
+.keyboard-active .input-field:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+  transform: scale(1.02) !important;
+}
+
+.keyboard-active .button-group {
+  position: fixed !important;
+  bottom: 8px !important;
+  left: 5px !important;
+  right: 5px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  padding: 6px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  z-index: 1000 !important;
+}
+
+/* 320×520px에서 키보드 특별 대응 */
+.iframe-320x520.keyboard-active .screen {
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.iframe-320x520.keyboard-active .container {
+  padding: 0 3px !important;
+}
+
+.iframe-320x520.keyboard-active .input-field {
+  padding: 4px 6px !important;
+  font-size: 0.7rem !important;
+}
+
+.iframe-320x520.keyboard-active button {
+  padding: 3px 5px !important;
+  font-size: 0.6rem !important;
+  min-height: 18px !important;
+}
+
+/* 키보드 숨김시 복원 */
+body:not(.keyboard-active) .screen {
+  padding: var(--container-padding) !important;
+  max-height: none !important;
+}
+
+body:not(.keyboard-active) .button-group {
+  position: relative !important;
+  bottom: auto !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 애니메이션 */
+.screen,
+.input-field,
+.button-group {
+  transition: all 0.3s ease !important;
+}
+
+/* 애니메이션 감소 설정 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .input-field,
+  .button-group {
+    transition: none !important;
+  }
+}
+
+/* ==================== 800×750px iframe 전용 최적화 (정리됨) ==================== */
+
+/* iframe 800×750 환경에서만 적용 */
+.iframe-800x750.container,
+.iframe-800x750 .container {
+  max-width: 720px !important;
+  padding: 0 40px !important;
+}
+
+.iframe-800x750 .screen {
+  padding: 40px 40px !important;
+}
+
+/* 800px iframe 서비스 카드 */
+.iframe-800x750 #service-selection .service-cards-container {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: auto auto !important;
+  gap: 32px !important;
+  max-width: 680px !important;
+  margin: 0 auto !important;
+}
+
+.iframe-800x750 .service-card[data-service="brand-song"] {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  padding: 32px 28px !important;
+  font-size: 18px !important;
+}
+
+.iframe-800x750 .service-card[data-service="narration"] {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  padding: 32px 28px !important;
+  font-size: 18px !important;
+}
+
+.iframe-800x750 .service-card[data-service="brand-song-narration"] {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  padding: 40px 36px !important;
+  font-size: 20px !important;
+}
+
+/* 800px iframe 아이콘 */
+.iframe-800x750 .service-card .icon-medium {
+  font-size: 3rem !important;
+}
+
+.iframe-800x750 .service-card[data-service="brand-song-narration"] .icon-medium {
+  font-size: 3.5rem !important;
+}
+
+/* 800px iframe 기타 요소들 */
+.iframe-800x750 button {
+  padding: 18px 28px !important;
+  font-size: 18px !important;
+  min-height: 52px !important;
+}
+
+.iframe-800x750 .completion-text {
+  font-size: 3.5rem !important;
+}
+
+.iframe-800x750 .checkmark-container {
+  width: 120px !important;
+  height: 120px !important;
+}
+
+.iframe-800x750 .question-title {
+  font-size: 2.5rem !important;
+}
+
+.iframe-800x750 .input-field {
+  padding: 20px 22px !important;
+  font-size: 18px !important;
+}
+
+.iframe-800x750 .option-card {
+  padding: 24px 22px !important;
+  font-size: 18px !important;
+}

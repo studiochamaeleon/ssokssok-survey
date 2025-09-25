@@ -4,6 +4,7 @@ import {
   narrationQuestions,
   getNarrationQuestions,
 } from './questions';
+import { wixCommunicator } from './wixCommunicator';
 
 // ==================== 타입 정의 ====================
 type Answers = Record<string, string | string[]>;
@@ -339,6 +340,8 @@ function updateProgressBar(): void {
 }
 
 function transitionToScreen(nextScreenId: string): void {
+  const currentScreenId = state.currentScreenId; // 현재 화면 ID 저장
+  
   const currentScreen = screens[state.currentScreenId];
   const nextScreen = screens[nextScreenId];
   
@@ -357,6 +360,19 @@ function transitionToScreen(nextScreenId: string): void {
   }
   
   state.currentScreenId = nextScreenId;
+  
+  // 👈 Wix Custom Element에 화면 전환 알림 (새로 추가)
+  wixCommunicator.sendScreenChange(currentScreenId, nextScreenId);
+  
+  // 👈 진행률 업데이트 (새로 추가)
+  const currentStep = getStepNumber(nextScreenId);
+  const totalSteps = state.totalSteps || 4;
+  wixCommunicator.sendProgress(currentStep, totalSteps, nextScreenId);
+  
+  // 👈 높이 업데이트 (새로 추가)
+  setTimeout(() => {
+    wixCommunicator.forceHeightUpdate();
+  }, 300);
 }
 
 function saveAndGoTo(nextScreenId: string): void {
@@ -1025,7 +1041,21 @@ function showCompletionScreen(): void {
   setTimeout(() => {
     triggerCompletionAnimations();
   }, 100);
-}
+
+  // 👈 Wix에 설문 완료 알림 (새로 추가)
+  setTimeout(() => {
+    wixCommunicator.sendCompletion({
+      brandName: state.brandName,
+      contactEmail: state.contactEmail,
+      selectedService: state.selectedService,
+      industryInput: state.industryInput,
+      answers: state.survey.answers,
+      completedAt: new Date().toISOString(),
+      totalAnswers: Object.keys(state.survey.answers).length,
+      completionRate: '100%'
+    });
+  }, 500);
+}  
 
 // 👈 새로 추가: 완료 화면 애니메이션 트리거 함수
 function triggerCompletionAnimations(): void {
@@ -1980,11 +2010,11 @@ function setupCompletionEvents(): void {
   });
 }
 
-// ==================== 메인 마운트 함수 ====================
+// src/surveyLogic.ts의 mountSurvey 함수 수정 (라인 2085 근처)
 export function mountSurvey(isMobile: boolean): void {
   console.log('🎯 mountSurvey 호출됨 - isMobile:', isMobile);
   
-  // 👈 새로 추가: 즉시 모바일 상태 강제 설정
+  // 즉시 모바일 상태 강제 설정
   const actualIsMobile = detectMobileImmediate();
   state.isMobile = actualIsMobile;
   
@@ -1996,7 +2026,28 @@ export function mountSurvey(isMobile: boolean): void {
   document.body.classList.toggle('mobile-mode', actualIsMobile);
   document.body.classList.toggle('desktop-mode', !actualIsMobile);
   
-  // 👈 기존 코드는 그대로 유지
+  // 👈 Custom Element 환경 확인 및 초기 설정 (새로 추가)
+  if (wixCommunicator.isConnected()) {
+    console.log('🎯 Wix Custom Element 모드로 실행');
+    console.log('🌐 Netlify URL: https://chimerical-truffle-e31c9e.netlify.app');
+    
+    // 초기 높이 전송 (조금 더 늦게)
+    setTimeout(() => {
+      wixCommunicator.forceHeightUpdate();
+    }, 1500);
+    
+    // 초기 진행률 전송 (시작 화면)
+    wixCommunicator.sendProgress(1, 4, 'intro-screen');
+    
+    // Wix에 초기화 완료 알림
+    wixCommunicator.sendMessage({
+      type: 'initialized',
+      version: '1.0',
+      features: ['heightSync', 'progressTracking', 'completion'],
+      timestamp: Date.now()
+    });
+  }
+  
   // 이미 초기화되었다면 모바일 상태만 업데이트
   if (isInitialized) {
     console.log('📱 모바일 상태 업데이트만 진행');
@@ -2081,4 +2132,45 @@ function handleResize(): void {
   }
   
   updateProgressBar();
+
+  // 👈 높이 업데이트 (새로 추가)
+  wixCommunicator.forceHeightUpdate();  
+}
+
+function getStepNumber(screenId: string): number {
+  const stepMap: Record<string, number> = {
+    'intro-screen': 1,
+    'brand-intro-screen': 2,
+    'store-name-screen': 3,
+    'industry-input-screen': 4,
+    'contact-info-screen': 5,
+    'service-selection-screen': 6,
+    'survey-screen': 7, // 동적으로 계산됨
+    'completion-screen': state.totalSteps - 1 || 10,
+    'submit-success-screen': state.totalSteps || 11
+  };
+  
+  // 설문 화면의 경우 현재 진행도로 계산
+  if (screenId === 'survey-screen') {
+    return 6 + (state.survey.currentStep || 0) + 1;
+  }
+  
+  return stepMap[screenId] || 1;
+}
+
+/**
+ * Wix에 직접 메시지 전송 (디버깅용)
+ */
+function sendMessageToWix(type: string, data: any): void {
+  wixCommunicator.sendMessage({
+    type,
+    ...data,
+    timestamp: Date.now()
+  });
+}
+
+// 전역 함수로 노출 (디버깅용)
+if (typeof window !== 'undefined') {
+  (window as any).sendMessageToWix = sendMessageToWix;
+  (window as any).wixCommunicator = wixCommunicator;
 }

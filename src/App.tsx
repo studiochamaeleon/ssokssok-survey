@@ -8,24 +8,8 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(() => {
     // 초기값을 즉시 계산
     const width = window.innerWidth;
-    const height = window.innerHeight;
     const isIframe = window !== window.parent;
     
-    // 👈 320x520 iframe 특별 감지 추가
-    if (isIframe && width <= 340 && height <= 540) {
-      console.log(`📱 320x520 iframe 감지: ${width}x${height}px`);
-      document.body.classList.add('iframe-320x520');
-      return true;
-    }
-
-    // 800×750 iframe 감지 (태블릿+데스크톱)
-    if (isIframe && width >= 750 && width <= 850 && height >= 700) {
-      console.log(`💻 800x750 데스크톱 iframe 감지: ${width}x${height}px`);
-      document.body.classList.add('iframe-800x750');
-      document.body.classList.add('desktop-mode');
-      return false; // 데스크톱 모드로
-    }    
-
     // Wix iframe 환경에서 모바일 감지
     if (isIframe && width <= 350) {
       console.log(`📱 즉시 모바일 감지: iframe ${width}px`);
@@ -41,9 +25,6 @@ export default function App() {
     console.log(`🖥️ 즉시 데스크톱 감지: 화면폭 ${width}px`);
     return false;
   });
-
-  // 👈 키보드 감지 상태 추가 (새로운 줄)
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);  
 
   const mountedRef = useRef(false);
   const currentMobileRef = useRef(isMobile);
@@ -89,58 +70,6 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, [isMobile]);
 
-  // 👈 키보드 감지 useEffect 새로 추가
-  useEffect(() => {
-    let initialHeight = window.innerHeight;
-    
-    const handleResize = () => {
-      const currentHeight = window.innerHeight;
-      const heightDiff = initialHeight - currentHeight;
-      
-      // 높이가 150px 이상 줄어들면 키보드가 올라온 것으로 판단
-      if (heightDiff > 150) {
-        console.log(`⌨️ 키보드 감지: 높이 차이 ${heightDiff}px`);
-        setIsKeyboardVisible(true);
-        document.body.classList.add('keyboard-visible');
-      } else {
-        console.log(`📱 키보드 숨김: 높이 차이 ${heightDiff}px`);
-        setIsKeyboardVisible(false);
-        document.body.classList.remove('keyboard-visible');
-      }
-    };
-
-    // 키보드 이벤트 리스너
-    window.addEventListener('resize', handleResize);
-    
-    // iOS의 경우 focusin/focusout 이벤트도 사용
-    const handleFocusIn = (e: FocusEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        console.log('📝 입력 필드 포커스');
-        setTimeout(() => {
-          setIsKeyboardVisible(true);
-          document.body.classList.add('keyboard-visible');
-        }, 300); // iOS 키보드 애니메이션 대기
-      }
-    };
-
-    const handleFocusOut = () => {
-      console.log('📝 입력 필드 포커스 해제');
-      setTimeout(() => {
-        setIsKeyboardVisible(false);
-        document.body.classList.remove('keyboard-visible');
-      }, 300);
-    };
-
-    document.addEventListener('focusin', handleFocusIn);
-    document.addEventListener('focusout', handleFocusOut);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('focusin', handleFocusIn);
-      document.removeEventListener('focusout', handleFocusOut);
-    };
-  }, []);  
-
   // 👈 나머지 코드는 그대로 유지
   const updateMobileState = (mobile: boolean) => {
     const event = new CustomEvent('mobileStateChange', { detail: { isMobile: mobile } });
@@ -150,8 +79,9 @@ export default function App() {
   const getButtonText = (mobileText: string, desktopText: string) => 
     isMobile ? mobileText : desktopText;
 
-return (
-  <main className={`relative w-full h-screen bg-pattern ${isMobile ? 'mobile-mode' : 'desktop-mode'} ${isKeyboardVisible ? 'keyboard-active' : ''}`}>
+  return (
+    // 나머지 JSX 코드는 그대로...
+    <main className={`relative w-full h-screen bg-pattern ${isMobile ? 'mobile-mode' : 'desktop-mode'}`}>
       {/* Toast Notification */}
       <div
         id="toast"
